@@ -1,0 +1,184 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Complaint Status{% endblock %}
+
+{% block content %}
+<div class="container" id="complaints-container" style="margin-top: 10rem;">
+  <h2>Your Reported Issues</h2>
+</div>
+
+<style>
+  .complaint-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .complaint-card:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+
+  .complaint-title {
+    font-weight: bold;
+    color: #007bff;
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+  }
+  .meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+  .status {
+    font-weight: bold;
+    margin-bottom: 0.7rem;
+    color: #333;
+  }
+
+  .progress-container {
+    background: #f1f1f1;
+    border-radius: 50px;
+    overflow: hidden;
+    height: 16px;
+    margin: 0.7rem 0 1.2rem;
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 50px;
+    transition: width 2s ease-in-out; /* Slow motion */
+    background-size: 200% 200%;
+    position: relative;
+  }
+
+  /* Shiny animated overlay */
+  .progress-bar::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.3) 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.3) 75%
+    );
+    background-size: 200% 100%;
+    animation: shine 2s linear infinite;
+  }
+
+  @keyframes shine {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Status wise colors with gradient glow */
+  .pending {
+    background: linear-gradient(90deg, #ffcc00, #ff9900);
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  }
+  .inprogress {
+    background: linear-gradient(90deg, #17a2b8, #00d4ff);
+    box-shadow: 0 0 10px rgba(23, 162, 184, 0.6);
+  }
+  .resolved {
+    background: linear-gradient(90deg, #28a745, #66ff99);
+    box-shadow: 0 0 12px rgba(40, 167, 69, 0.6);
+  }
+</style>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+const userEmail = "{{ session.get('user_email') }}";
+const container = document.getElementById("complaints-container");
+
+if (!userEmail) {
+    container.innerHTML = "<p>Please login to see your issues.</p>";
+}
+
+const socket = io();
+socket.emit("join", { email: userEmail });
+
+const statusColors = {
+    "Pending": "pending",
+    "Received": "pending",
+    "In Progress": "inprogress",
+    "Resolved": "resolved"
+};
+
+let issuesData = [];
+
+async function fetchUserIssues() {
+    try {
+        const res = await fetch("/user/issues");
+        if (!res.ok) throw new Error("Failed to load issues");
+        issuesData = await res.json();
+        renderIssues();
+        animateProgressBars(); // Run animation after rendering
+    } catch (err) {
+        container.innerHTML = "<p>Error loading issues. Please try again later.</p>";
+        console.error(err);
+    }
+}
+
+function renderIssues() {
+    container.innerHTML = "";
+    if (!issuesData.length) {
+        container.innerHTML = "<p>No issues found.</p>";
+        return;
+    }
+
+    issuesData.forEach(issue => {
+        const progressClass = statusColors[issue.status] || "pending";
+        let progressWidth = 0;
+        if (issue.status === "Pending" || issue.status === "Received") progressWidth = 20;
+        else if (issue.status === "In Progress") progressWidth = 60;
+        else if (issue.status === "Resolved") progressWidth = 100;
+
+        container.innerHTML += `
+            <div class="complaint-card" id="issue-${issue.id}">
+              <div class="complaint-title">${issue.title}</div>
+              <div class="meta">Category: ${issue.category}</div>
+              <div class="status">Status: ${issue.status}</div>
+              <div class="progress-container">
+                <div class="progress-bar ${progressClass}" data-width="${progressWidth}%"></div>
+              </div>
+              <div class="meta">Last Updated: ${issue.updated_at || "N/A"}</div>
+            </div>
+        `;
+    });
+}
+
+function animateProgressBars() {
+  document.querySelectorAll(".progress-bar").forEach(bar => {
+    const finalWidth = bar.getAttribute("data-width");
+    bar.style.width = "0%";  // Start from 0
+    setTimeout(() => {
+      bar.style.width = finalWidth;  // Animate to final width
+    }, 300);
+  });
+}
+
+// Initial fetch
+fetchUserIssues();
+
+// Real-time updates
+socket.on("status_update", data => {
+    if (data.email !== userEmail) return;
+    const issue = issuesData.find(i => i.id === data.issue_id);
+    if (issue) {
+        issue.status = data.status;
+        issue.updated_at = data.updated_at;
+        renderIssues();
+        animateProgressBars(); // Re-run animation on update
+    }
+});
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Forgot Password{% endblock %}
+
+{% block content %}
+  <style>
+    /* Optional inline styles for demonstration */
+    #howto { font-family: Arial, sans-serif; margin-top: 5rem; padding: 0; }
+    .container-l { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+    .section-title { font-size: 2em; margin-bottom: 30px; text-align: center; }
+    .steps-list { display: flex; flex-direction: column; gap: 20px; }
+    .step-item { display: flex; gap: 15px; align-items: flex-start; background: #f9f9f9; padding: 15px; border-radius: 8px; }
+    .step-num { font-size: 1.5em; font-weight: bold; background: #007BFF; color: white; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .step-item h4 { margin: 0 0 5px; }
+    .step-item p { margin: 0; }
+  </style>
+
+ <section id="howto">
+    <div class="container-l">
+      <h2 class="section-title" data-key="how_to_use_title">How to Use This App — Step by Step</h2>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div>
+            <h4 data-key="step1_title">Open the Report Form</h4>
+            <p data-key="step1_desc">Click Report an Issue from the homepage to open the report modal or page.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div>
+            <h4 data-key="step2_title">Capture Clear Evidence</h4>
+            <p data-key="step2_desc">Take a clear photo or short video of the issue.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div>
+            <h4 data-key="step3_title">Choose Location</h4>
+            <p data-key="step3_desc">Use the map picker or enter the address to pinpoint location.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div>
+            <h4 data-key="step4_title">Select Category & Add Details</h4>
+            <p data-key="step4_desc">Pick category (Roads, Garbage, etc.) and describe the issue.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">5</div>
+          <div>
+            <h4 data-key="step5_title">Submit & Get an ID</h4>
+            <p data-key="step5_desc">Submit the report — you’ll receive a complaint ID.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">6</div>
+          <div>
+            <h4 data-key="step6_title">Engage the Community</h4>
+            <p data-key="step6_desc">Share the complaint link for others to like/comment.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">7</div>
+          <div>
+            <h4 data-key="step7_title">Track & Verify Resolution</h4>
+            <p data-key="step7_desc">Use the complaint ID to check status and verify when done.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% endblock %}

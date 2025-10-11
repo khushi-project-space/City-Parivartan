@@ -1,0 +1,531 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Report an Issue{% endblock %}
+
+{% block content %}
+
+<style>
+  .signup-wrapper {
+    margin: 0;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    background: linear-gradient(270deg, #f48fb1, #81d4fa, #a5d6a7, #fff59d);
+    background-size: 800% 800%;
+    animation: bgAnimation 25s ease infinite;
+
+    /* Center content */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+
+  @keyframes bgAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Waves */
+  .wave {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+
+    height: 200px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 100%;
+    animation: waveAnimation 10s infinite linear;
+    z-index: 1;
+  }
+
+  .wave:nth-child(2) {
+    bottom: 20px;
+    background: rgba(0, 0, 0, 0.15);
+    animation-duration: 15s;
+  }
+
+  .wave:nth-child(3) {
+    bottom: 40px;
+    background: rgba(255, 255, 255, 0.5);
+    animation-duration: 20s;
+  }
+
+  @keyframes waveAnimation {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+
+
+  /* People silhouettes */
+  .people {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 30px;
+    z-index: 2;
+  }
+
+  .person {
+    width: 60px;
+    height: 120px;
+    background: #6a1b9a;
+    border-radius: 15px;
+    position: relative;
+    animation: float 4s ease-in-out infinite;
+  }
+
+  .person::before {
+    content: "";
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 35px;
+    height: 35px;
+    background: #ab47bc;
+    border-radius: 50%;
+  }
+
+  .person:nth-child(2) {
+    background: #1565c0;
+  }
+
+  .person:nth-child(2)::before {
+    background: #42a5f5;
+  }
+
+  .person:nth-child(3) {
+    background: #2e7d32;
+  }
+
+  .person:nth-child(3)::before {
+    background: #66bb6a;
+  }
+
+  .person:nth-child(4) {
+    background: #ef6c00;
+  }
+
+  .person:nth-child(4)::before {
+    background: #ffb74d;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Icons */
+  .icon {
+    position: absolute;
+    font-size: 35px;
+    opacity: 0.9;
+    animation: floatIcon 10s ease-in-out infinite;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .fa-users {
+    color: #1565c0;
+    top: 15%;
+    left: 8%;
+  }
+
+  .fa-comments {
+    color: #2e7d32;
+    top: 25%;
+    left: 85%;
+  }
+
+  .fa-bullhorn {
+    color: #ef6c00;
+    top: 65%;
+    left: 10%;
+  }
+
+  .fa-earth-americas {
+    color: #6a1b9a;
+    top: 70%;
+    left: 80%;
+  }
+
+  .fa-recycle {
+    color: #00897b;
+    top: 40%;
+    left: 5%;
+  }
+
+  .fa-triangle-exclamation {
+    color: #c62828;
+    top: 20%;
+    left: 70%;
+  }
+
+  .fa-box-ballot {
+    color: #f9a825;
+    top: 50%;
+    left: 20%;
+  }
+
+  @keyframes floatIcon {
+
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.8;
+    }
+
+    50% {
+      transform: translateY(-15px);
+      opacity: 1;
+    }
+  }
+
+  /* Twinkling dots */
+  .dot {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: twinkle 5s infinite alternate;
+    z-index: 0;
+  }
+
+  .dot:nth-child(12) {
+    top: 15%;
+    left: 30%;
+    animation-delay: 1s;
+  }
+
+  .dot:nth-child(13) {
+    top: 25%;
+    left: 70%;
+    animation-delay: 2s;
+  }
+
+  .dot:nth-child(14) {
+    top: 50%;
+    left: 40%;
+    animation-delay: 3s;
+  }
+
+  .dot:nth-child(15) {
+    top: 70%;
+    left: 80%;
+    animation-delay: 4s;
+  }
+
+  @keyframes twinkle {
+    0% {
+      opacity: 0.2;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  /* Signup form */
+  .signup-box {
+    position: relative;
+    z-index: 3;
+    background: transparent;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 450px;
+    /* restrict width to avoid overflow */
+  }
+
+  .signup-box h2 {
+    margin: 0 0 20px 0;
+    color: rgb(20, 58, 20);
+    text-align: center;
+  }
+
+  .signup-box .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .signup-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 0;
+    border: 0;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.2);
+    outline: none;
+  }
+
+  .signup-box input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.7);
+  }
+
+  .signup-box button {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(90deg, #42a5f5, #66bb6a);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+
+  .signup-box button:hover {
+    background: linear-gradient(90deg, #1e88e5, #388e3c);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+  }
+
+  .login-link {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .login-link a {
+    color: #1565c0;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+
+  .error-msg {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 2px;
+  }
+
+  /* Make grid single column on small screens */
+  @media screen and (max-width: 600px) {
+    .signup-box .form-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .signup-box .form-grid {
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+    }
+
+    .people {
+      display: none;
+    }
+
+    /* hide background elements */
+    .signup-box {
+      padding: 20px;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    .signup-wrapper {
+      padding: 10px;
+    }
+
+    .icon,
+    .dot {
+      display: none;
+    }
+
+    .signup-box {
+      padding: 15px;
+      max-width: 100%;
+    }
+
+    .signup-box button {
+      padding: 10px;
+      font-size: 14px;
+    }
+  }
+</style>
+<div class="signup-wrapper">
+  <!-- Waves -->
+  <div class="wave"></div>
+  <div class="wave"></div>
+  <div class="wave"></div>
+
+  <!-- left-to-right waves -->
+  <div class="wave wave-reverse"></div>
+  <div class="wave wave-reverse"></div>
+
+
+  <!-- People silhouettes -->
+  <div class="people">
+    <div class="person"></div>
+    <div class="person"></div>
+    <div class="person"></div>
+    <div class="person"></div>
+  </div>
+
+  <!-- Icons -->
+  <i class="fas fa-users icon"></i>
+  <i class="fas fa-comments icon"></i>
+  <i class="fas fa-bullhorn icon"></i>
+  <i class="fas fa-earth-americas icon"></i>
+  <i class="fas fa-recycle icon"></i>
+  <i class="fas fa-triangle-exclamation icon"></i>
+  <i class="fas fa-box-ballot icon"></i>
+
+  <!-- Dots -->
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+  <div class="dot"></div>
+
+  <!-- Signup Form -->
+  <div class="signup-box">
+    <h2 data-key="signup_title">Create Account</h2>
+    <form id="signupForm" method="POST" action="{{ url_for('register.register') }}">
+    <div class="form-grid">
+  <input type="text" id="f_nm" name="f_nm" data-key="signup_firstname" placeholder="First Name" required>
+  <input type="text" id="l_nm" name="l_nm" data-key="signup_lastname" placeholder="Last Name" required>
+  <input type="email" id="email" name="email" data-key="signup_email" placeholder="Email" required>
+  <input type="tel" id="phone" name="phone" data-key="signup_phone" placeholder="Phone Number" minlength="10"
+    maxlength="10" required>
+
+  <!-- Password with toggle -->
+  <div style="position: relative; width: 100%;">
+    <input id="password" type="password" name="password" data-key="signup_password"
+      placeholder="Password"
+      style="width:100%; padding:10px 35px 10px 10px; font-size:16px; border:1px solid #ccc; border-radius:5px; outline:none;"
+      required>
+    <i class="fa fa-eye"
+       onclick="let pw=document.getElementById('password'); let t=this; pw.type=(pw.type==='password')?'text':'password'; t.className=(pw.type==='password')?'fa fa-eye':'fa fa-eye-slash';"
+       style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; color:black;"></i>
+  </div>
+
+  <!-- Confirm Password with toggle -->
+  <div style="position: relative; width: 100%;">
+    <input id="confirmPassword" type="password" name="confirmPassword" data-key="signup_confirm"
+      placeholder="Confirm Password"
+      style="width:100%; padding:10px 35px 10px 10px; font-size:16px; border:1px solid #ccc; border-radius:5px; outline:none;"
+      required>
+    <i class="fa fa-eye"
+       onclick="let pw=document.getElementById('confirmPassword'); let t1=this; pw.type=(pw.type==='password')?'text':'password'; t1.className=(pw.type==='password')?'fa fa-eye':'fa fa-eye-slash';"
+       style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; color:black;"></i>
+  </div>
+</div>
+
+      <span id="f_nm_error" class="error-msg"></span>
+      <span id="l_nm_error" class="error-msg"></span>
+      <span id="email_error" class="error-msg"></span>
+      <span id="phone_error" class="error-msg"></span>
+      <span id="password_error" class="error-msg"></span>
+      <span id="confirm_error" class="error-msg"></span>
+
+      <button type="submit" data-key="signup_btn">Sign Up</button>
+      <div class="login-link">
+        <span data-key="already_account">Already have an account?</span>
+        <a href="/login" data-key="login_link">Login</a>
+      </div>
+    </form>
+  </div>
+
+</div>
+<script>
+  function validateName(val) {
+    return /^[A-Za-z]{1,15}$/.test(val)
+      ? ""
+      : (translations["error_invalid_name"] || "Only letters, max 15 chars");
+  }
+  function validateEmail(val) {
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val)
+      ? ""
+      : (translations["error_invalid_email"] || "Invalid email");
+  }
+  function validatePhone(val) {
+    return /^[0-9]{10}$/.test(val)
+      ? ""
+      : (translations["error_invalid_phone"] || "Phone must be 10 digits");
+  }
+  function validatePassword(val) {
+    return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{5,}$/.test(val)
+      ? ""
+      : (translations["error_invalid_password"] || "Invalid password format");
+  }
+
+  // realtime validation
+  document.getElementById("f_nm").addEventListener("input", e => {
+    document.getElementById("f_nm_error").textContent = validateName(e.target.value.trim());
+  });
+  document.getElementById("l_nm").addEventListener("input", e => {
+    document.getElementById("l_nm_error").textContent = validateName(e.target.value.trim());
+  });
+  document.getElementById("email").addEventListener("input", e => {
+    document.getElementById("email_error").textContent = validateEmail(e.target.value.trim());
+  });
+  document.getElementById("phone").addEventListener("input", e => {
+    document.getElementById("phone_error").textContent = validatePhone(e.target.value.trim());
+  });
+  document.getElementById("password").addEventListener("input", e => {
+    document.getElementById("password_error").textContent = validatePassword(e.target.value);
+    const confirmVal = document.getElementById("confirmPassword").value;
+    document.getElementById("confirm_error").textContent =
+      (e.target.value === confirmVal) ? "" : (translations["error_password_mismatch"] || "Passwords do not match");
+  });
+  document.getElementById("confirmPassword").addEventListener("input", e => {
+    const pwVal = document.getElementById("password").value;
+    document.getElementById("confirm_error").textContent =
+      (pwVal === e.target.value) ? "" : (translations["error_password_mismatch"] || "Passwords do not match");
+  });
+
+  // submit validation
+  document.getElementById("signupForm").addEventListener("submit", function (e) {
+    const errors = [
+      validateName(document.getElementById("f_nm").value.trim()),
+      validateName(document.getElementById("l_nm").value.trim()),
+      validateEmail(document.getElementById("email").value.trim()),
+      validatePhone(document.getElementById("phone").value.trim()),
+      validatePassword(document.getElementById("password").value),
+      (document.getElementById("password").value === document.getElementById("confirmPassword").value)
+        ? "" : (translations["error_password_mismatch"] || "Passwords do not match")
+    ];
+    if (errors.some(err => err !== "")) {
+      e.preventDefault();
+      alert(translations["error_fix"] || "Please fix errors before submitting");
+    }
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,188 @@
+/* === General Theme === */
+body {
+  background: #0d1b2a;
+  color: #e0e6ed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* === Sidebar === */
+.sidebar {
+  position: fixed;
+  width: 250px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #0a192f, #112240);
+  overflow: hidden;
+  transition: transform 0.3s ease;
+  box-shadow: 3px 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.sidebar-content {
+  padding: 2rem 1rem;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-align: center;
+  color: #64ffda;
+  letter-spacing: 1px;
+  animation: fadeInDown 1s ease;
+}
+
+/* Nav links */
+.nav-link {
+  transition: all 0.3s;
+  color: #e0e6ed;
+}
+.nav-link:hover {
+  background: rgba(100, 255, 218, 0.15);
+  border-radius: 6px;
+  padding-left: 1.2rem;
+  transform: scale(1.05);
+  color: #64ffda;
+}
+.nav-link.active {
+  background: rgba(100, 255, 218, 0.2);
+  font-weight: bold;
+  border-radius: 6px;
+  color: #64ffda;
+}
+
+/* === Stat Cards === */
+.stat-card {
+  border-radius: 12px;
+  background: #1b263b;
+  color: #e0e6ed;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: none;
+}
+.stat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(100, 255, 218, 0.2);
+}
+
+/* === Table Styling (Matches User/Issue Page) === */
+.table {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #1b263b;
+  color: #e0e6ed;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background-color: #112240;
+}
+
+.table thead th {
+  color: #64ffda !important;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  background-color: #112240;
+}
+
+.table tbody td {
+  background-color: rgba(27, 38, 59, 0.6) !important;
+  transition: background 0.3s;
+  color: white;
+}
+
+.table-hover tbody tr:hover {
+  background-color: rgba(100, 255, 218, 0.1);
+}
+
+/* === Dark Bootstrap Table Override === */
+.recent-table {
+  /* Override Bootstrap 5.3 table background variables */
+  --bs-table-bg: #1b263b !important;
+  --bs-table-striped-bg: rgba(27, 38, 59, 0.8) !important;
+  --bs-table-hover-bg: rgba(100, 255, 218, 0.1) !important;
+  color: #e0e6ed !important;
+}
+
+/* Optional: If using striped or accented variations */
+.recent-table.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: var(--bs-table-striped-bg) !important;
+}
+
+.recent-table.table-hover > tbody > tr:hover > * {
+  background-color: var(--bs-table-hover-bg) !important;
+}
+
+/* Ensure header matches theme */
+.recent-table thead th {
+  background-color: #112240 !important;
+  color: #64ffda !important;
+  border: none;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.recent-table tbody td{
+  color: white !important;
+}
+/* === Animations === */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Mobile Sidebar === */
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1050;
+    transform: translateX(-100%);
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}
+
+/* Utility for screen readers */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+ /* for chart on right */
+ .chart-map-container {
+  display: flex;
+  gap: 7rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.chart-box {
+  flex: 1;
+  min-width: 200px;
+  max-width: 315px;
+
+}
+.map-box {
+  flex: 1;
+  min-width: 300px;
+  max-width: 100%;
+  text-align: center;
+}
+.map-box img {
+  width: 600px;
+  height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Citizens - Admin Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d1b2a;
+      color: #e0e6ed;
+    }
+
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #64ffda;
+    }
+
+    .citizen-table table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 12px;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .citizen-table th,
+    .citizen-table td {
+      padding: 12px 16px;
+      text-align: left;
+    }
+
+    .citizen-table th {
+      background: #112240;
+      color: #64ffda;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .citizen-table tr {
+      background-color: rgba(27, 38, 59, 0.6);
+      transition: background .3s;
+    }
+
+    .citizen-table tr:hover {
+      background-color: rgba(100, 255, 218, 0.15);
+    }
+
+    /* ✅ Responsive Media Queries */
+
+    /* Large screens adjustments */
+    @media (max-width: 1200px) {
+      .main-content {
+        padding: 1.5rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    /* Tablets */
+    @media (max-width: 992px) {
+      .dashboard {
+        flex-direction: column;
+        /* stack sidebar and content */
+      }
+
+      .main-content {
+        margin-top: 1rem;
+        padding: 1rem;
+      }
+
+      .citizen-table th,
+      .citizen-table td {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* Small tablets / large phones */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 0.8rem;
+      }
+
+      .citizen-table {
+        overflow-x: auto;
+        /* enable scroll */
+      }
+
+      .citizen-table table {
+        min-width: 700px;
+        /* keep table usable */
+        display: block;
+      }
+
+      .header h1 {
+        font-size: 1.3rem;
+      }
+    }
+
+    /* Mobile phones */
+    @media (max-width: 576px) {
+      .main-content {
+        padding: 0.5rem;
+      }
+
+      .header h1 {
+        font-size: 1.1rem;
+      }
+
+      .citizen-table th,
+      .citizen-table td {
+        padding: 8px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard">
+    {% include 'admin/sidebar.html' %}
+
+    <main class="main-content">
+      <header class="header">
+        <h1>All Citizens</h1>
+      </header>
+
+      <section class="citizen-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Email</th>
+              <th>Phone Number</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in citizens %}
+            <tr>
+              <td>{{ c.id }}</td>
+              <td>{{ c.first_name }}</td>
+              <td>{{ c.last_name }}</td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.phone_no }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</body>
+
+</html>

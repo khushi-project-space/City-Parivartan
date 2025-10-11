@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Animated Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/style_admin.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+  <style>
+    .card-body {
+      background-color: #1b263b;
+      border-radius: 20px;
+    }
+    .info.legend {
+  background: white;
+  padding: 10px 15px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.3);
+  font: 14px/1.4 "Segoe UI", Arial, sans-serif;
+  color: #333;
+}
+
+.info.legend h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 4px;
+}
+
+.info.legend .legend-item {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.info.legend .legend-color {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+  </style>
+</head>
+
+<body>
+  <div class="d-flex">
+    {% include 'admin/sidebar.html' %}
+    <!-- Main Content -->
+    <main class="flex-grow-1 p-4" style="margin-top: 5rem;">
+
+      <!-- Stats Section -->
+      <section class="mb-5">
+        <div class="row g-4">
+          <div class="col-md-4">
+            <div class="card stat-card text-center shadow-sm">
+              <div class="card-body">
+                <i class="fas fa-hourglass-half fa-2x mb-2 text-primary"></i>
+                <h3 id="stat1">{{ stats.received_count }}</h3>
+                <p>Received Issues</p>
+
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card stat-card text-center shadow-sm">
+              <div class="card-body">
+                <i class="fas fa-spinner fa-2x mb-2 text-warning"></i>
+                <h3 id="stat2">{{ stats.in_progress_count }}</h3>
+                <p>In Progress</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card stat-card text-center shadow-sm">
+              <div class="card-body">
+                <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
+                <h3 id="stat3">{{ stats.resolved_count }}</h3>
+                <p>Resolved</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="card stat-card text-center shadow-sm">
+              <div class="card-body">
+                <i class="fas fa-list fa-2x mb-2 text-info"></i>
+                <h3 id="stat4">{{ stats.total_count }}</h3>
+                <p>Total Issues</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Map + Category Chart Section -->
+      <section class="mb-5">
+        <div class="chart-map-container">
+          <!-- Map placeholder (LEFT) -->
+          <div class="map-box">
+
+            <!-- Row for Status Bar Chart  -->
+            <div class="row mb-5">
+              <div class="col-12">
+                <div class="card shadow-sm">
+                  <div class="card-body">
+                    <h5 class="card-title text-center fw-bold" style="color: white;">Overall Issues by Status</h5>
+                    <div id="map" style="width: 100%; height: 400px; border-radius:12px;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Chart (RIGHT) -->
+          <div class="chart-box">
+            <h2 class="fw-bold mb-3 text-teal">Category-wise Issues</h2>
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Issues Section -->
+      <section>
+        <h2 class="fw-bold mb-3 text-teal">Recent Issues</h2>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle shadow-sm recent-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Citizen</th>
+                <th>Issue</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for issue in recent_issues %}
+              <tr>
+                <td>{{ issue.id }}</td>
+                <td>{{ issue.citizen }}</td>
+                <td>{{ issue.title }}</td>
+                <td>
+                  {% if issue.status == "Received" %}
+                  <span class="badge bg-warning text-dark">Received</span>
+                  {% elif issue.status == "In Progress" %}
+                  <span class="badge bg-info text-dark">In Progress</span>
+                  {% elif issue.status == "Resolved" %}
+                  <span class="badge bg-success">Resolved</span>
+                  {% endif %}
+                </td>
+
+                <td>{{ issue.date }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+
+    </main>
+  </div>
+  <!-- LEAFLET CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    // Initialize map with Anand bounds
+    var anandBounds = L.latLngBounds([22.50, 72.90], [22.60, 73.00]);
+    var map = L.map('map').setView([22.5525, 72.9511], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      minZoom: 12,
+      maxZoom: 18
+    }).addTo(map);
+
+    map.fitBounds(anandBounds);
+
+    var categoryColors = {
+      'water': '#5DADE2',
+      'garbage': '#FF7F50',
+      'roads': '#F1C40F',
+      'animal rescue': '#1ABC9C',
+      'drainage': '#9B59B6',
+
+    };
+
+    var markers = [];
+
+    function loadIssues() {
+      fetch("/api/issues") // make sure this route exists and returns JSON of all issues
+        .then(res => res.json())
+        .then(issues => {
+          // remove old markers
+          markers.forEach(m => map.removeLayer(m));
+          markers = [];
+
+          issues.forEach(issue => {
+            if (issue.latitude && issue.longitude) {
+              var lat = parseFloat(issue.latitude);
+              var lng = parseFloat(issue.longitude);
+
+              if (!isNaN(lat) && !isNaN(lng)) {
+                var marker = L.circleMarker([lat, lng], {
+                  radius: 8,
+                  fillColor: categoryColors[(issue.category || '').toLowerCase()] || 'gray',
+                  color: '#fff',
+                  weight: 1,
+                  opacity: 1,
+                  fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(
+                  `<b>${issue.category || 'Unknown'}</b><br>
+                 Area: ${issue.area || 'N/A'}<br>
+                 Description: ${issue.description || 'N/A'}<br>
+                 Status: ${issue.status || 'N/A'}`
+                );
+
+                markers.push(marker);
+              }
+            }
+          });
+
+          // auto-fit bounds if markers exist
+          if (markers.length > 0) {
+            var group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.2));
+          }
+        })
+        .catch(err => console.error("Error loading issues:", err));
+    }
+
+    // Initial load + refresh every 10s
+    loadIssues();
+    setInterval(loadIssues, 10000);
+
+    // Legend
+    var legend = L.control({ position: 'topright' });
+    legend.onAdd = function (map) {
+      var div = L.DomUtil.create('div', 'info legend');
+      div.innerHTML = '<h4>Categories</h4>';
+
+      for (var key in categoryColors) {
+        div.innerHTML += `
+      <div class="legend-item">
+        <span class="legend-color" style="background:${categoryColors[key]}"></span>
+        <span>${key.charAt(0).toUpperCase() + key.slice(1)}</span>
+      </div>
+    `;
+      }
+      return div;
+    };
+
+    legend.addTo(map);
+  </script>
+
+  <!-- 🔹 Embed JSON data from Flask -->
+  <script id="categories-json" type="application/json">
+    {{ categories | tojson }}
+  </script>
+  <script id="stats-json" type="application/json">
+    {{ stats | tojson }}
+  </script>
+
+  <!-- Category Doughnut Chart Script -->
+  <script>
+    const categories = JSON.parse(document.getElementById("categories-json").textContent);
+    const categoryLabels = categories.map(c => c.category);
+    const categoryCounts = categories.map(c => c.count);
+
+    const ctx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: categoryLabels,
+        datasets: [{
+          label: 'Issues',
+          data: categoryCounts,
+          backgroundColor: [
+            '#36A2EB',
+            '#FF6384',
+            '#FFCE56',
+            '#4BC0C0',
+            '#9966FF'
+          ],
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        cutout: "70%",
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: "white",
+              font: { size: 14 }
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                let label = context.label || '';
+                let value = context.raw;
+                let total = context.chart._metasets[0].total;
+                let percentage = ((value / total) * 100).toFixed(1) + '%';
+                return `${label}: ${value} (${percentage})`;
+              }
+            }
+          },
+          datalabels: {
+            color: 'white',
+            font: { weight: 'bold', size: 14 },
+            formatter: (value, context) => {
+              const total = context.chart._metasets[0].total;
+              const percentage = ((value / total) * 100).toFixed(1) + '%';
+              return percentage;
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels]
+    });
+  </script>
+
+  <!-- Status Bar Chart Script -->
+  <script>
+    const stats = JSON.parse(document.getElementById("stats-json").textContent);
+    const statuses = ["Received", "In Progress", "Resolved"];
+    const statusCounts = [stats.received_count, stats.in_progress_count, stats.resolved_count];
+
+    const ctx3 = document.getElementById("statusBarChart").getContext("2d");
+    const statusBarChart = new Chart(ctx3, {
+      type: "bar",
+      data: {
+        labels: statuses,
+        datasets: [{
+          label: "Number of Issues",
+          data: statusCounts,
+          backgroundColor: ["#FFCE56", "#36A2EB", "#4BC0C0"],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          datalabels: {
+            color: "white",
+            anchor: "end",
+            align: "top",
+            font: { weight: "bold" }
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                let total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                let value = context.raw;
+                let percentage = ((value / total) * 100).toFixed(1) + "%";
+                return `${context.label}: ${value} (${percentage})`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "white",
+              font: { weight: "bold" }
+            },
+            title: {
+              display: true,
+              text: "Status",
+              color: "white",
+              font: { size: 14, weight: "bold" }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: "white",
+              font: { weight: "bold" }
+            },
+            title: {
+              display: true,
+              text: "Number of Issues",
+              color: "white",
+              font: { size: 14, weight: "bold" }
+            }
+          }
+        }
+      },
+      plugins: [ChartDataLabels, {
+        id: 'custom_canvas_background_color',
+        beforeDraw: (chart) => {
+          const ctx = chart.canvas.getContext('2d');
+          ctx.save();
+          ctx.fillStyle = '#1b263b';
+          ctx.fillRect(0, 0, chart.width, chart.height);
+          ctx.restore();
+        }
+      }]
+    });
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/script_admin.js') }}"></script>
+</body>
+
+</html>
