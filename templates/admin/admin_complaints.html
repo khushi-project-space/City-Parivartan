@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Complaints Overview</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d1b2a;
+      color: white;
+    }
+
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar width handling */
+    .sidebar {
+      width: 250px;
+      flex-shrink: 0;
+      background: #112240;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      padding-top: 100px;
+    }
+
+    .complaints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .complaint-box {
+      position: relative;
+      background: #1b263b;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      transition: transform 0.3s;
+      cursor: pointer;
+    }
+
+    .complaint-box:hover {
+      transform: translateY(-5px);
+    }
+
+    .complaint-photo {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .complaint-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+    }
+
+    .complaint-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    .stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .resolved-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 60px;
+      height: 60px;
+    }
+
+    .resolved-badge img {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Modal styling */
+    .modal-body img {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 8px;
+      display: block;
+      margin: 0 auto 15px auto;
+    }
+
+    .modal-stats {
+      display: flex;
+      justify-content: space-around;
+      font-size: 1rem;
+      margin-top: 15px;
+    }
+
+    /* Comments box */
+    .modal-comments {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 200px; /* scroll if too many comments */
+      overflow-y: auto;
+      background: rgba(255,255,255,0.05);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .modal-comments h6 {
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .comment-item {
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .comment-item:last-child {
+      border-bottom: none;
+    }
+
+    @media (max-width: 992px) {
+      .dashboard {
+        flex-direction: column;
+      }
+      .main-content {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    {% include 'admin/sidebar.html' %}
+
+    <main class="main-content">
+      <div class="complaints-grid">
+        {% for c in complaints %}
+        <div class="complaint-box"
+             data-image="{% if c.status and c.status|lower == 'resolved' and c.resolved_photo_path %}
+                           {{ url_for('static', filename='resolved_images/' ~ c.resolved_photo_path) }}
+                         {% else %}
+                           {{ url_for('static', filename='uploads/' ~ c.image_path) }}
+                         {% endif %}"
+             data-category="{{ c.category }}"
+             data-area="{{ c.area }}"
+             data-description="{{ c.description }}"
+             data-likes="{{ c.likes }}"
+             data-dislikes="{{ c.dislikes }}"
+             data-comments='{{ c.comments|tojson | safe }}'
+             data-status="{{ c.status|default('pending') }}">
+
+          <!-- Thumbnail -->
+          <img src="{% if c.status and c.status|lower == 'resolved' and c.resolved_photo_path %}
+                      {{ url_for('static', filename='resolved_images/' ~ c.resolved_photo_path) }}
+                    {% else %}
+                      {{ url_for('static', filename='uploads/' ~ c.image_path) }}
+                    {% endif %}" 
+               class="complaint-photo" alt="{{ c.category }}">
+
+          {% if c.status and c.status|lower == 'resolved' %}
+            <div class="resolved-badge">
+              <img src="{{ url_for('static', filename='img/resolved_badge.png') }}" alt="Resolved Badge">
+            </div>
+          {% endif %}
+
+          <div class="complaint-overlay">
+            <div class="complaint-title">{{ c.category }}</div>
+            <div class="stats">
+              <div class="like">👍 {{ c.likes }}</div>
+              <div class="dislike">👎 {{ c.dislikes }}</div>
+              <div class="comment">💬 {{ c.comments|length }}</div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+  </div>
+
+  <!-- Complaint Details Modal -->
+  <div class="modal fade" id="complaintModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark text-white">
+        <div class="modal-header">
+          <h5 class="modal-title">Complaint Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="modalImage" src="" alt="Complaint Photo">
+          <p id="modalCategory" class="mt-2"></p>
+          <p id="modalArea"></p>
+          <p id="modalDescription"></p>
+          <p id="modalStatus"></p>
+
+          <!-- Likes / Dislikes / Comments Count -->
+          <div class="modal-stats">
+            <div id="modalLikes">👍 0</div>
+            <div id="modalDislikes">👎 0</div>
+            <div id="modalComments">💬 0</div>
+          </div>
+
+        
+         <!-- Comments -->
+<div class="modal-comments">
+  <h6>Comments</h6>
+  <div id="modalCommentsList"></div>
+</div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const boxes = document.querySelectorAll(".complaint-box");
+      const modal = new bootstrap.Modal(document.getElementById("complaintModal"));
+
+      boxes.forEach(box => {
+        box.addEventListener("click", () => {
+          document.getElementById("modalImage").src = box.dataset.image;
+          document.getElementById("modalCategory").innerText = "Category: " + box.dataset.category;
+          document.getElementById("modalArea").innerText = "Area: " + box.dataset.area;
+          document.getElementById("modalDescription").innerText = "Description: " + box.dataset.description;
+          document.getElementById("modalStatus").innerText = "Status: " + box.dataset.status;
+
+          // update likes, dislikes, comments count
+          document.getElementById("modalLikes").innerText = "👍 " + box.dataset.likes;
+          document.getElementById("modalDislikes").innerText = "👎 " + box.dataset.dislikes;
+
+          // load actual comments
+       // inside your click event
+const commentsContainer = document.getElementById("modalCommentsList");
+commentsContainer.innerHTML = ""; // reset
+try {
+  const comments = JSON.parse(box.dataset.comments || "[]");
+  document.getElementById("modalComments").innerText = "💬 " + comments.length;
+
+  if (comments.length > 0) {
+    comments.forEach(c => {
+  const div = document.createElement("div");
+  div.classList.add("comment-item");
+
+  if (typeof c === "object") {
+    // ✅ only take the comment text
+    let text = c.comment || "";
+    div.innerText = text;
+  } else {
+    div.innerText = c; // fallback if it's a plain string
+  }
+
+  commentsContainer.appendChild(div);
+});
+
+  } else {
+    commentsContainer.innerHTML = "<p class='text-muted'>No comments yet.</p>";
+  }
+} catch {
+  document.getElementById("modalComments").innerText = "💬 0";
+  commentsContainer.innerHTML = "<p class='text-muted'>No comments available.</p>";
+}
+
+          modal.show();
+        });
+      });
+    });
+  </script>
+</body>
+</html>

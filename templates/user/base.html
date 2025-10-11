@@ -1,0 +1,71 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Citizen Connect{% endblock %}</title>
+<!-- AI ChatBot -->
+
+    
+    <script src="https://cdn.botpress.cloud/webchat/v3.3/inject.js"></script>
+    <script src="https://files.bpcontent.cloud/2025/09/20/17/20250920172459-JIF2I9UE.js" defer></script>
+    
+    
+  <!-- AI ChatBot End -->
+  <!-- Shared styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+  <!-- Navbar -->
+  {% include 'user/navbar.html' %}
+
+  <!-- Page-specific content -->
+  {% block content %}{% endblock %}
+
+  <!-- Shared footer -->
+  <footer class="site-footer">
+    <div class="footer-inner container-l">
+      <div>
+       <h5 data-key="about_us_title">About Us</h5>
+<p data-key="about_us_desc">
+  Citizen Connect is a platform empowering citizens to report and resolve civic issues collaboratively.
+</p>
+        <div style="margin-top:.5rem; opacity:.9">
+          <h5 data-key="contact_info_title">Contact Info</h5>
+<ul>
+  <li><i class="fa-solid fa-envelope"></i> <span >cityparivartan@gmail.com</span></li>
+  <li><i class="fa-solid fa-phone"></i> <span data-key="phone">+1 (555) 123-4567</span></li>
+  <li><i class="fa-solid fa-location-dot"></i> <span data-key="address">123 Civic St, Cityville</span></li>
+</ul>
+        </div>
+      </div>
+
+      <div class="socials">
+       <h3 data-key="follow_us">Follow us</h3>
+        <a href="#" style="color:#fff; margin-right:.6rem"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" style="color:#fff; margin-right:.6rem"><i class="fa-brands fa-twitter"></i></a>
+        <a href="#" style="color:#fff"><i class="fa-brands fa-instagram"></i></a>
+      </div>
+    </div>
+    <center>
+      <p class="copyright">&copy; 2025  City પરિવર્તન . All rights reserved.</p>
+    </center>
+  </footer>
+
+  <!-- Shared scripts -->
+  <script>
+    const LOGOUT_URL = "{{ url_for('login1.logout') }}";
+    const LOGIN_URL = "{{ url_for('login1.login') }}";
+  </script>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+<script src="{{ url_for('static', filename='lang.js') }}"></script>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

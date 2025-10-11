@@ -1,0 +1,77 @@
+<style>
+  #languageSelector{
+    border-radius: 5px;
+    padding: 2px;
+  }
+ 
+</style>
+<header class="site-header" role="banner">
+  <div class="nav-wrap">
+    <a class="brand" href="{{ url_for('index') }}" style="text-decoration: none;">
+       <img src="{{ url_for('static', filename='img/logo2.png') }}" alt="">
+    </a>
+
+    <nav aria-label="Primary navigation">
+      <button class="hamburger" id="navToggle" aria-expanded="false" aria-controls="primaryNav"
+        title="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+
+      <div id="primaryNav" class="nav-links">
+        <!-- Navbar links with IDs for JS -->
+        <a id="navHome" href="{{ url_for('index') }}">Home</a>
+        <a id="navReport" href="{{ url_for('report_issue') }}">Report Issue</a>
+        <a id="navExplore" href="{{ url_for('complaints.complaints') }}">Explore Issues</a>
+        <a id="navSteps" href="{{ url_for('steps') }}">How to Use</a>
+        <a id="navStatus" href="{{ url_for('status') }}">Track Status</a>
+
+        <div id="userMenu">
+          {% if user_name %}
+            <a id="navLogout" class="btn-ghost" href="#">Logout</a>
+            <span style="color:#fff; margin-left:1rem;">
+              <a id="navProfile" href="{{ url_for('profile.profile') }}">{{ user_name }}</a>
+            </span>
+          {% else %}
+            <a id="navLogin" class="btn-ghost" href="{{ url_for('login1.login') }}">Login / Sign up</a>
+          {% endif %}
+        </div>
+
+        <!-- Language Dropdown -->
+        <!-- <div class="language-selector" style="margin-left:1rem;">
+          <select id="languageSelector">
+            <option value="en">English</option>
+            <option value="gu">ગુજરાતી</option>
+            <option value="hi">हिंदी</option>
+          </select>
+        </div> -->
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Logout JS inside template (Flask url_for works here) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('navLogout');
+  if (!logoutBtn) return;
+
+  logoutBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("{{ url_for('login1.logout') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      });
+      const data = await res.json();
+      if (data.status === "logged_out") {
+        window.location.href = "{{ url_for('login1.login') }}";
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
+  });
+});
+</script>
+
+<!-- Language switching JS -->
+<script src="{{ url_for('static', filename='lang.js') }}"></script>

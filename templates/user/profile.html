@@ -1,0 +1,336 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<style>
+  .profile-page {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+    padding: 3rem 1rem;
+    min-height: calc(100vh - 160px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .profile-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    margin-top: 66px;
+  }
+
+  .profile-pic {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #007bff;
+    margin-bottom: 1rem;
+    background: #f0f0f0;
+    cursor: pointer;
+  }
+
+  .user-info {
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  .user-info label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: block;
+    margin-top: 0.8rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .user-info input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: #f8f9fa;
+    transition: 0.3s;
+  }
+
+  .user-info input:disabled {
+    background: #f0f0f0;
+    cursor: not-allowed;
+  }
+
+  .btn {
+    display: inline-block;
+    background: linear-gradient(45deg, #9192ee, #8ce7af);
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    font-size: 1rem;
+    transition: background 0.3s;
+    text-decoration: none;
+  }
+
+  .btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+  }
+
+  .btn-secondary:hover {
+    background: #545b62;
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+  }
+
+  .modal-content img {
+    max-width: 100%;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .modal-content button {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0;
+  }
+
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+
+  #languageSelector {
+    padding: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    width: 100%;
+    transition: all 0.3s ease;
+    background: #fafafa;
+  }
+
+  /* New Features */
+  .user-points {
+    margin-top: 1rem;
+    background: #f0f8ff;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  .user-points p {
+    margin: 0.3rem 0;
+    font-weight: bold;
+  }
+
+  .coupons-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.8rem;
+  }
+
+  .coupons-table th, .coupons-table td {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    text-align: center;
+  }
+
+  .badge {
+    background: #ffd700;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-weight: bold;
+  }
+
+  .coupon-active {
+    color: green;
+    font-weight: bold;
+  }
+
+  .coupon-used {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+
+<div class="profile-page">
+  <div class="profile-card">
+    <!-- Profile Picture -->
+    <img
+      src="{{ url_for('static', filename=user.profile_pic) if user.profile_pic else '/static/img/user_default.png' }}"
+      alt="Profile Picture" id="profilePic" class="profile-pic">
+
+    <!-- User Info -->
+    <div class="user-info">
+      <label for="first_name">First Name:</label>
+      <input type="text" id="first_name" value="{{ user.first_name }}">
+
+      <label for="last_name">Last Name:</label>
+      <input type="text" id="last_name" value="{{ user.last_name }}">
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" value="{{ user.email }}" disabled>
+
+      <label for="contact">Contact:</label>
+      <input type="text" id="contact" value="{{ user.phone_no }}">
+      <br>
+      <label for="language">Select Your Language:</label>
+      <div class="language-selector">
+        <select id="languageSelector">
+          <option value="en">English</option>
+          <option value="gu">ગુજરાતી</option>
+          <option value="hi">हिंदी</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Points, Coupons, Badge -->
+    <div class="user-points">
+      <p>Points: {{ user.points }}</p>
+      <p>Coupons: {{ user.coupons }}</p>
+      <!-- <p>Badge: {% if user.badge %}<span class="badge">{{ user.badge }}</span>{% else %}No badge yet{% endif %}</p> -->
+
+      {% if coupons %}
+        <table class="coupons-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Discount (%)</th>
+              <th>Created At</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for coupon in coupons %}
+            <tr>
+              <td>{{ coupon.code }}</td>
+              <td>{{ coupon.percent }}</td>
+              <td>{{ coupon.created_at }}</td>
+              <td class="{{ 'coupon-used' if coupon.used else 'coupon-active' }}">{{ 'Used' if coupon.used else 'Active' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No coupons available yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Buttons -->
+   <div>
+  <button class="btn" id="editBtn">Edit</button>
+  <button class="btn" id="saveBtn">Save</button>
+  <form action="{{ url_for('profile.delete_profile') }}" method="POST" style="display:inline;">
+  <button type="submit" class="btn"
+          onclick="return confirm('Are you sure you want to delete your profile? This action cannot be undone?');">
+    Delete
+  </button>
+</form>
+
+</div>
+
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="picModal">
+  <div class="modal-content">
+    <span class="close" id="closeModal">&times;</span>
+    <img id="modalPic" src="" alt="Profile Picture Preview">
+    <button class="btn btn-secondary" id="updatePicBtn">Update Profile Pic</button>
+    <input type="file" id="uploadPic" accept="image/*" style="display:none;">
+  </div>
+</div>
+
+<script>
+  const editBtn = document.getElementById("editBtn");
+  const saveBtn = document.getElementById("saveBtn");
+  const inputs = document.querySelectorAll(".user-info input");
+
+  editBtn.addEventListener("click", () => {
+    inputs.forEach(i => { if (i.id !== 'email') i.disabled = false; });
+  });
+
+  saveBtn.addEventListener("click", () => {
+    const formData = new FormData();
+    formData.append("first_name", document.getElementById("first_name").value);
+    formData.append("last_name", document.getElementById("last_name").value);
+    formData.append("phone_no", document.getElementById("contact").value);
+
+    const profileFile = document.getElementById("uploadPic").files[0];
+    if (profileFile) formData.append("profile_pic", profileFile);
+
+    fetch("{{ url_for('profile.profile') }}", { method: "POST", body: formData })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message || "Profile updated successfully!");
+        location.reload();
+      })
+      .catch(err => console.error(err));
+  });
+
+  // Profile pic modal
+  const profilePic = document.getElementById("profilePic");
+  const modal = document.getElementById("picModal");
+  const modalPic = document.getElementById("modalPic");
+  const closeModal = document.getElementById("closeModal");
+  const updatePicBtn = document.getElementById("updatePicBtn");
+  const uploadPic = document.getElementById("uploadPic");
+
+  profilePic.addEventListener("click", () => {
+    modal.style.display = "flex";
+    modalPic.src = profilePic.src;
+  });
+
+  closeModal.addEventListener("click", () => modal.style.display = "none");
+  updatePicBtn.addEventListener("click", () => uploadPic.click());
+
+  uploadPic.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      profilePic.src = URL.createObjectURL(file);
+      modalPic.src = profilePic.src;
+    }
+  });
+
+  window.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+</script>
+{% endblock %}

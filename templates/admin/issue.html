@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Issues - Admin Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Segoe UI, Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d1b2a;
+      color: #e0e6ed;
+    }
+
+    .dashboard {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+      color: #64ffda;
+    }
+
+    .issues-table {
+      margin-top: 1rem;
+    }
+
+    .issue-img,
+    .resolved-img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .camera-btn {
+      font-size: 1.2rem;
+      color: #64ffda;
+      cursor: pointer;
+    }
+
+    .status {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .status.received {
+      background: rgba(224, 242, 254, 0.2);
+      color: #38bdf8;
+    }
+
+    .status.in-progress {
+      background: rgba(254, 243, 199, 0.2);
+      color: #facc15;
+    }
+
+    .status.resolved {
+      background: rgba(187, 247, 208, 0.2);
+      color: #22c55e;
+    }
+
+    .badge-severity {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: bold;
+    }
+
+    .severity-low {
+      background: #facc15;
+      color: #1b263b;
+    }
+
+    .severity-medium {
+      background: #38bdf8;
+      color: #0d1b2a;
+    }
+
+    .severity-high {
+      background: #22c55e;
+      color: #0d1b2a;
+    }
+
+    .table-container {
+      max-height: 600px;
+      overflow-x: auto !important;
+      overflow-y: auto !important;
+      border: 1px solid #1b263b;
+      border-radius: 8px;
+    }
+
+    table {
+      min-width: 1200px;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      position: sticky;
+      top: 0;
+      background: #112240;
+      z-index: 2;
+    }
+
+    th,
+    td {
+      padding: 12px 16px;
+      text-align: left;
+      vertical-align: middle;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 200px;
+    }
+
+    td.description-cell {
+      max-width: 200px;
+      overflow: hidden;
+      position: relative;
+      white-space: normal;
+    }
+
+    th {
+      color: #64ffda;
+      text-transform: uppercase;
+    }
+
+    tr:hover {
+      background: rgba(100, 255, 218, 0.15);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard">
+    {% include 'admin/sidebar.html' %}
+    <main class="main-content" style="margin-top: 5rem;">
+      <header class="header">
+        <h1>All Issues</h1>
+      </header>
+
+      <!-- Filters Section -->
+      <form method="get" class="filters mb-3 d-flex flex-wrap gap-2" id="filters-form">
+        <select name="status" class="form-select w-auto">
+          <option value="">All Status</option>
+          <option value="Received" {{ "selected" if selected_status=="Received" else "" }}>Received</option>
+          <option value="In Progress" {{ "selected" if selected_status=="In Progress" else "" }}>In Progress</option>
+          <option value="Resolved" {{ "selected" if selected_status=="Resolved" else "" }}>Resolved</option>
+        </select>
+
+        <select name="category" class="form-select w-auto">
+          <option value="">All Categories</option>
+          {% for c in categories %}
+          <option value="{{ c }}" {{ "selected" if selected_category==c else "" }}>{{ c }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="severity" class="form-select w-auto">
+          <option value="">All Severities</option>
+          <option value="Low" {{ "selected" if selected_severity=="Low" else "" }}>Low</option>
+          <option value="Medium" {{ "selected" if selected_severity=="Medium" else "" }}>Medium</option>
+          <option value="High" {{ "selected" if selected_severity=="High" else "" }}>High</option>
+        </select>
+
+        <a href="{{ url_for('admin_issue.admin_issue') }}" class="btn btn-sm btn-outline-light">Reset</a>
+      </form>
+
+      <!-- Issues Table -->
+      <section class="issues-table">
+        <div class="table-container">
+          <table class="table table-hover table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Severity</th>
+                <th>Area</th>
+                <th>Image</th>
+                <th>Resolved Image</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Generate PDF</th>
+                <th>Created At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in reports %}
+              <tr id="report-{{ report.id }}">
+                <td>{{ report.id }}</td>
+                <td>{{ report.title }}</td>
+                <td class="description-cell" data-full="{{ report.description }}">{{ report.description }}</td>
+                <td>{{ report.category }}</td>
+                <td><span class="badge-severity severity-{{ report.severity|lower }}">{{ report.severity }}</span></td>
+                <td>{{ report.area }}</td>
+                <td>
+                  {% if report.image_path %}
+                  <img src="{{ url_for('static', filename='uploads/' ~ report.image_path) }}"
+                    class="issue-img">
+                  {% else %}—{% endif %}
+                </td>
+                <td>
+                  {% if report.resolved_photo_path %}
+                  <img src="{{ url_for('static', filename='resolved_images/' ~ report.resolved_photo_path) }}"
+                    class="resolved-img" data-status="{{ report.status }}">
+                  {% else %}
+                  <i class="fa fa-camera camera-btn" data-id="{{ report.id }}" data-status="{{ report.status }}"
+                    title="Add resolved image"></i>
+                  {% endif %}
+                </td>
+                <td><a href="#" class="user-email" data-email="{{ report.email }}">{{ report.email }}</a></td>
+                <td>
+                  <span class="status {{ report.status|lower|replace(' ','-') }}" data-id="{{ report.id }}"
+                    data-email="{{ report.email }}">{{ report.status }}</span>
+                </td>
+                <td>
+                  <a href="{{ url_for('admin_issue.generate_pdf', report_id=report.id) }}"
+                    class="btn btn-sm btn-outline-info">
+                    Generate
+                  </a>
+                </td>
+                <td>{{ report.created_at }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Camera Modal -->
+  <div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Capture Resolved Image</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <video id="camera-video" width="100%" autoplay></video>
+          <canvas id="camera-canvas" style="display:none;"></canvas>
+          <button id="take-photo" class="btn btn-success mt-2">Take Photo</button>
+          <button id="upload-photo" class="btn btn-primary mt-2" style="display:none;">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Details Modal -->
+  <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">User Details</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>ID:</strong> <span id="ud-id"></span></p>
+          <p><strong>First Name:</strong> <span id="ud-fname"></span></p>
+          <p><strong>Last Name:</strong> <span id="ud-lname"></span></p>
+          <p><strong>Email:</strong> <span id="ud-email"></span></p>
+          <p><strong>Phone:</strong> <span id="ud-phone"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image View Modal -->
+  <div class="modal fade" id="imageViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">View Image</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="modal-image" src="" style="max-width:100%; max-height:80vh; border-radius:8px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  // ------------------- Status update -------------------
+  function attachStatusUpdate() {
+    document.querySelectorAll(".status").forEach(statusEl => {
+      statusEl.addEventListener("click", () => {
+        if (statusEl.querySelector("select")) return;
+        const currentStatus = statusEl.textContent.trim();
+        const select = document.createElement("select");
+        select.innerHTML = `
+          <option value="Received" ${currentStatus === "Received" ? "selected" : ""}>Received</option>
+          <option value="In Progress" ${currentStatus === "In Progress" ? "selected" : ""}>In Progress</option>
+          <option value="Resolved" ${currentStatus === "Resolved" ? "selected" : ""}>Resolved</option>
+        `;
+        statusEl.textContent = "";
+        statusEl.appendChild(select);
+        select.focus();
+        select.addEventListener("change", () => {
+          const newStatus = select.value;
+          const reportId = statusEl.dataset.id;
+          fetch(`/update-status/${reportId}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: newStatus })
+          }).then(res => res.json())
+           .then(data => {
+  if (data.success) {
+    statusEl.className = "status " + newStatus.toLowerCase().replace(" ", "-");
+    statusEl.textContent = newStatus;
+    alert("Status updated! Email has been sent to the user.");
+    // Auto-refresh the page after status change
+    location.reload();
+  } else alert("Error updating status");
+});
+
+        });
+      });
+    });
+  }
+
+  // ------------------- User details modal -------------------
+  function attachUserDetails() {
+    document.querySelectorAll(".user-email").forEach(emailEl => {
+      emailEl.addEventListener("click", e => {
+        e.preventDefault();
+        const email = emailEl.dataset.email;
+        fetch(`/user-details/${encodeURIComponent(email)}`)
+          .then(res => res.json())
+          .then(user => {
+            if (user.error) return alert("User not found");
+            document.getElementById("ud-id").textContent = user.id;
+            document.getElementById("ud-fname").textContent = user.first_name;
+            document.getElementById("ud-lname").textContent = user.last_name;
+            document.getElementById("ud-email").textContent = user.email;
+            document.getElementById("ud-phone").textContent = user.phone_no;
+            new bootstrap.Modal(document.getElementById("userDetailsModal")).show();
+          });
+      });
+    });
+  }
+
+  // ------------------- Read more -------------------
+  function attachReadMore() {
+    document.querySelectorAll(".description-cell").forEach(cell => {
+      const fullText = cell.dataset.full ? cell.dataset.full.trim() : "";
+      const maxChars = 15;
+      if (fullText.length > maxChars && cell.dataset.expanded !== "true") {
+        const shortText = fullText.substring(0, maxChars) + "... ";
+        cell.innerHTML = shortText + `<span class="read-more" style="color:#64ffda; cursor:pointer;">Read more</span>`;
+        cell.dataset.expanded = "false";
+        cell.addEventListener("click", e => {
+          if (e.target.classList.contains("read-more")) {
+            cell.innerHTML = fullText + ` <span class="read-less" style="color:#64ffda; cursor:pointer;">Read less</span>`;
+            cell.dataset.expanded = "true";
+          } else if (e.target.classList.contains("read-less")) {
+            cell.innerHTML = shortText + `<span class="read-more" style="color:#64ffda; cursor:pointer;">Read more</span>`;
+            cell.dataset.expanded = "false";
+          }
+        });
+      }
+    });
+  }
+
+  // ------------------- Camera modal -------------------
+  let currentReportId = null;
+  let currentReportStatus = null;
+  const cameraModal = new bootstrap.Modal(document.getElementById("cameraModal"));
+  const video = document.getElementById("camera-video");
+  const canvas = document.getElementById("camera-canvas");
+  const takeBtn = document.getElementById("take-photo");
+  const uploadBtn = document.getElementById("upload-photo");
+
+  document.querySelectorAll(".camera-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      currentReportId = btn.dataset.id;
+      currentReportStatus = btn.dataset.status;
+
+      if (currentReportStatus !== "Resolved") {
+        return alert("Cannot upload resolved image until complaint status is 'Resolved'.");
+      }
+
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        video.srcObject = stream;
+        video.style.display = "block";
+        canvas.style.display = "none";
+        takeBtn.style.display = "inline-block";
+        uploadBtn.style.display = "none";
+        cameraModal.show();
+      }).catch(err => alert("Camera error: " + err));
+    });
+  });
+
+  takeBtn.addEventListener("click", () => {
+    // Set canvas size to match the modal's max width while keeping aspect ratio
+    const modalWidth = video.clientWidth;
+    const modalHeight = video.clientHeight;
+
+    // Calculate scale to fit modal
+    const scale = Math.min(modalWidth / video.videoWidth, modalHeight / video.videoHeight);
+
+    canvas.width = video.videoWidth * scale;
+    canvas.height = video.videoHeight * scale;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    video.style.display = "none";
+    canvas.style.display = "block";
+    takeBtn.style.display = "none";
+    uploadBtn.style.display = "inline-block";
+});
+
+
+  uploadBtn.addEventListener("click", () => {
+    canvas.toBlob(blob => {
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported");
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(pos => {
+        const formData = new FormData();
+        formData.append("photo", blob, "resolved.jpg");
+        formData.append("latitude", pos.coords.latitude);
+        formData.append("longitude", pos.coords.longitude);
+
+        fetch(`/upload-resolved/${currentReportId}`, { method: "POST", body: formData })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) location.reload();
+            else alert("Upload failed: " + (data.error || "Unknown error"));
+          });
+      }, err => alert("Geolocation error: " + err.message));
+    });
+  });
+
+  // ------------------- Image modal view -------------------
+  const imageViewModal = new bootstrap.Modal(document.getElementById("imageViewModal"));
+  const modalImage = document.getElementById("modal-image");
+  document.querySelectorAll(".issue-img, .resolved-img").forEach(img => {
+    img.addEventListener("click", () => {
+      modalImage.src = img.src;
+      imageViewModal.show();
+    });
+  });
+
+  attachStatusUpdate();
+  attachReadMore();
+  attachUserDetails();
+});
+  </script>
+
+  <!-- for dropdown -->
+   <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Automatically submit the filters form when dropdown changes
+    document.querySelectorAll("#filters-form select").forEach(select => {
+      select.addEventListener("change", () => {
+        document.getElementById("filters-form").submit();
+      });
+    });
+  });
+</script>
+
+
+</body>
+</html>

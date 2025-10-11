@@ -1,0 +1,489 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Report an Issue{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --scene-h: 100vh;
+  }
+
+  /* Wrapper for login page (instead of overriding body) */
+  .login-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(#e9f6ff, #dbeff6);
+    min-height: calc(100vh - 120px);
+    /* adjust depending on navbar+footer height */
+    padding-bottom: 60px;
+    /* spacing above footer */
+    height: 100vh;
+  }
+
+  .scene {
+    position: relative;
+    width: 150vw;
+    height: var(--scene-h);
+    overflow: hidden;
+    border-radius: 12px;
+    background: transparent;
+  }
+
+  .bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  .cloud {
+    position: absolute;
+    top: -50px;
+    opacity: 0.9;
+    z-index: 5;
+    pointer-events: none;
+    will-change: transform;
+    filter: brightness(1.05) blur(0.3px);
+  }
+
+  .cloud-left {
+    animation: cloudLeftToRight 60s linear infinite;
+  }
+
+  .cloud-right {
+    animation: cloudRightToLeft 60s linear infinite;
+  }
+
+  @keyframes cloudLeftToRight {
+    0% {
+      transform: translateX(10%);
+    }
+
+    100% {
+      transform: translateX(120%);
+    }
+  }
+
+  @keyframes cloudRightToLeft {
+    0% {
+      transform: translateX(300%);
+    }
+
+    100% {
+      transform: translateX(-120%);
+    }
+  }
+
+  .worker {
+    position: absolute;
+    left: 14%;
+    bottom: 5%;
+    width: 280px;
+    z-index: 6;
+    pointer-events: none;
+    animation: sweepMotion 1.5s ease-in-out infinite alternate;
+    transform-origin: center bottom;
+  }
+
+  @keyframes sweepMotion {
+    from {
+      transform: rotate(3deg) translateX(0px);
+    }
+
+    to {
+      transform: rotate(5deg) translateX(6px);
+    }
+  }
+
+  .dust {
+    position: absolute;
+    left: 18%;
+    bottom: 5%;
+    width: 300px;
+    z-index: 5;
+    opacity: 0.8;
+  }
+
+  .bin {
+    position: absolute;
+    right: 26%;
+    bottom: 10%;
+    width: 200px;
+    z-index: 6;
+    animation: binShake 3s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+
+  .bin_up {
+    position: absolute;
+    right: 26%;
+    bottom: 30%;
+    width: 200px;
+    z-index: 6;
+    animation: binUpMotion 3s ease-in-out infinite;
+    transform-origin: center bottom;
+  }
+
+  @keyframes binUpMotion {
+    0% {
+      transform: translateY(0) rotate(0);
+    }
+
+    25% {
+      transform: translateY(-10px) rotate(-3deg);
+    }
+
+    50% {
+      transform: translateY(-20px) rotate(0);
+    }
+
+    75% {
+      transform: translateY(-10px) rotate(3deg);
+    }
+
+    100% {
+      transform: translateY(0) rotate(0);
+    }
+  }
+
+  @keyframes binShake {
+    0% {
+      transform: translateY(0) rotate(0);
+    }
+
+    20% {
+      transform: translateY(1px) rotate(5deg);
+    }
+
+    40% {
+      transform: translateY(0) rotate(0);
+    }
+
+    60% {
+      transform: translateY(5px) rotate(0);
+    }
+
+    100% {
+      transform: translateY(0) rotate(0);
+    }
+  }
+
+  .garbage {
+    position: absolute;
+    right: 20%;
+    bottom: 9%;
+    width: 250px;
+    z-index: 15;
+    opacity: 0.9;
+    animation: garbageMotion 3s ease-in-out infinite alternate;
+  }
+
+  @keyframes garbageMotion {
+    0% {
+      transform: translateY(0px) rotate(0);
+    }
+
+    50% {
+      transform: translateY(0px) rotate(-1deg);
+    }
+
+    100% {
+      transform: translateY(0px) rotate(0);
+    }
+  }
+
+  /* login card */
+  .login-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 340px;
+    padding: 28px;
+    text-align: center;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 6px 20px rgba(10, 30, 60, 0.2);
+    color: #fff;
+  }
+
+  .login-card h2 {
+    margin-bottom: 1rem;
+  }
+
+  .login-card label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: block;
+    text-align: left;
+    margin-top: 0.5rem;
+  }
+
+  .login-card input,
+  .login-card button {
+    width: 100%;
+    padding: 11px;
+    border-radius: 8px;
+    font-size: 1rem;
+    border: 0;
+    margin-top: 0.4rem;
+    outline: none;
+  }
+
+  .login-card input {
+    background: rgba(255, 255, 255, 0.2);
+    color: black;
+  }
+
+  .login-card input:focus {
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 183, 255, 0.7);
+  }
+
+  .login-card button {
+    background: linear-gradient(45deg, #9192ee, #8ce7af);
+    color: black;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+
+  .login-card button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.6);
+  }
+
+  .link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+
+  .link a {
+    color: #00e6ff;
+    text-decoration: none;
+  }
+
+  .link a:hover {
+    color: #fff;
+  }
+
+  .error-msg {
+    color: red;
+    font-size: 0.85rem;
+    margin-top: 2px;
+    text-align: left;
+  }
+
+  img {
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  /* Large screens (default) */
+  .login-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 340px;
+    padding: 28px;
+  }
+
+  /* Medium screens: 1024px - 768px */
+  @media (max-width: 1024px) {
+    .scene {
+      width: 100vw;
+      height: auto;
+      min-height: 100vh;
+    }
+
+    .login-card {
+      position: absolute;
+      /* switch from absolute */
+      left: 30%;
+      top: 30%;
+      transform: none;
+      margin: 2rem auto;
+      /* center horizontally with margin */
+      width: 90%;
+      max-width: 400px;
+      padding: 24px;
+    }
+
+    /* Optional: reduce decoration sizes */
+    .worker,
+    .dust,
+    .bin,
+    .bin_up,
+    .garbage,
+    .cloud {
+      width: 150px;
+    }
+  }
+
+  /* Small screens: <768px */
+  @media (max-width: 768px) {
+
+    .worker,
+    .dust,
+    .bin,
+    .bin_up,
+    .garbage,
+    .cloud {
+      display: none;
+      /* hide all decorations */
+    }
+
+    .login-card {
+      width: 95%;
+      padding: 20px;
+      position: absolute;
+      /* switch from absolute */
+      left: 25%;
+      top: 30%;
+    }
+
+    .login-card h2 {
+      font-size: 1.2rem;
+    }
+
+    .login-card input,
+    .login-card button {
+      font-size: 0.9rem;
+      padding: 10px;
+    }
+  }
+
+  @media(max-width:600px) {
+    .login-card {
+      position: absolute;
+      left: 16%;
+      
+      top: 25%;
+      width: 80vw;
+    }
+  }
+  @media(max-width:500px){
+    .login-card{
+      position: absolute;
+      left: 10%;
+      top: 30%;
+    }
+  }
+</style>
+
+<div class="login-wrapper">
+  <div class="scene" id="scene">
+    <!-- background -->
+    <img src="/static/img/bg.png" alt="background" class="bg">
+
+    <!-- clouds -->
+    <img src="/static/img/cloud.png" alt="cloud1" class="cloud cloud-left" style="width:420px; animation-duration:60s;">
+    <img src="/static/img/cloud.png" alt="cloud2" class="cloud cloud-left" style="width:380px; animation-duration:70s;">
+    <img src="/static/img/cloud.png" alt="cloud3" class="cloud cloud-right"
+      style="width:400px; animation-duration:69s;">
+    <img src="/static/img/cloud.png" alt="cloud4" class="cloud cloud-right"
+      style="width:360px; animation-duration:75s;">
+
+    <!-- worker -->
+    <img src="/static/img/woman.png" alt="woman sweeping" class="worker">
+
+    <!-- dust -->
+    <img src="/static/img/dust.png" alt="dust" class="dust">
+
+    <!-- bins -->
+    <img src="/static/img/removebg (2).png" alt="bin_top" class="bin_up">
+    <img src="/static/img/removebg.png" alt="bin" class="bin" data-depth="0.02">
+
+    <!-- garbage -->
+    <img src="/static/img/garbage.png" alt="garbage" class="garbage">
+
+    <!-- login card -->
+   <div class="login-card">
+  <h2 style="color: rgb(15, 15, 41);" data-key="login_title">Welcome Back</h2>
+  
+  <form id="loginForm" method="POST" action="{{ url_for('login1.login') }}">
+  <input type="email" id="email" name="email" placeholder="" data-key-placeholder="login_email" required>
+  <span id="email_error" class="error-msg"></span>
+
+  <!-- Password with toggle -->
+  <div style="position: relative; width: 100%;">
+    <input type="password" id="password" name="password" placeholder="" data-key-placeholder="login_password" required
+      style="width:100%; padding:10px 35px 10px 10px; font-size:16px; border:1px solid #ccc; border-radius:5px; outline:none;">
+    <i class="fa fa-eye"
+       onclick="let pw=document.getElementById('password'); let t=this; pw.type=(pw.type==='password')?'text':'password'; t.className=(pw.type==='password')?'fa fa-eye':'fa fa-eye-slash';"
+       style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px; color:black;"></i>
+  </div>
+  <span id="password_error" class="error-msg"></span>
+
+  <button type="submit" class="btn" data-key="login_btn">Login</button>
+</form>
+
+
+  <div class="link" style="color:  rgb(15, 15, 41);">
+    <span data-key="no_account">Don’t have an account?</span> 
+    <a href="{{ url_for('signup') }}" style="color: rgb(17, 17, 230);" data-key="signup_link">Sign Up</a><br>
+    <a href="{{ url_for('forget.forget_page') }}" style="color: rgb(17, 17, 230);" data-key="forgot_link">Forget Password</a>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<script>
+  // parallax effect
+  (function () {
+    const scene = document.getElementById('scene');
+    const elems = scene.querySelectorAll('[data-depth]');
+    scene.addEventListener('mousemove', (e) => {
+      const rect = scene.getBoundingClientRect();
+      const mx = (e.clientX - rect.left) / rect.width - 0.5;
+      const my = (e.clientY - rect.top) / rect.height - 0.5;
+      elems.forEach(el => {
+        const depth = parseFloat(el.dataset.depth) || 0;
+        const x = (mx * depth * rect.width).toFixed(2);
+        const y = (my * depth * rect.height).toFixed(2);
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      });
+    });
+    if ('ontouchstart' in window) scene.removeEventListener('mousemove', null);
+  })();
+
+  // validation
+   function validateEmail(val) {
+    return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val)
+      ? ""
+      : (translations["error_invalid_email"] || "Invalid email");
+  }
+
+  function validatePassword(val) {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{5,}$/;
+    return regex.test(val)
+      ? ""
+      : (translations["error_invalid_password"] || "Password must be 5+ chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char");
+  }
+
+  document.getElementById("email").addEventListener("input", e => {
+    document.getElementById("email_error").textContent = validateEmail(e.target.value.trim());
+  });
+  document.getElementById("password").addEventListener("input", e => {
+    document.getElementById("password_error").textContent = validatePassword(e.target.value);
+  });
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    const emailErr = validateEmail(document.getElementById("email").value.trim());
+    const passErr = validatePassword(document.getElementById("password").value);
+    if (emailErr || passErr) {
+      e.preventDefault();
+      alert(translations["error_fix"] || "Please fix errors before submitting");
+    }
+  });
+</script>
+{% endblock %}

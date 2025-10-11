@@ -1,0 +1,291 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Civic Issue Reporting & Resolution System — Improved{% endblock %}
+
+{% block content %}
+
+<main id="home">
+  <!-- HERO SECTION -->
+  <section class="hero">
+    <div class="inner container-l">
+      <h1 style="font-size: 4rem;"><i class="fa-solid fa-bullhorn" style="color: #ffb300;"></i></h1>
+      <h1 class="fade-in-up"><span data-key="hero_title">Your City, Your Voice</span><br>
+        <span data-key="hero_subtitle">Report Civic Issues Instantly</span>
+      </h1>
+      <p class="fade-in-up" data-key="hero_desc">
+        Snap a photo, add a location, and track the issue until it’s resolved. Community
+        verification keeps authorities accountable.
+      </p>
+      <div class="hero-actions fade-in-up">
+        <button class="btn-primary">
+          <a href="{{url_for('report_issue')}}" style="text-decoration: none;" data-key="report_issue_btn">
+            Report an Issue
+          </a>
+        </button>
+        <button class="btn-secondary" onclick="scrollToSection('#explore')" data-key="explore_heatmap_btn">
+          Explore Heatmap
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="container-l">
+      <h2 class="section-title" data-key="how_it_works_title">How It Works</h2>
+      <div class="how-grid">
+        <a href="{{ url_for('report_issue') }}" style="text-decoration: none;">
+          <div class="how-step card animate-on-scroll">
+            <div class="big-icon"><i class="fa-solid fa-camera"></i></div>
+            <h4 data-key="capture_title">Capture</h4>
+            <p data-key="capture_desc">Snap a photo or short video of the issue (clear visuals help faster action).</p>
+          </div>
+        </a>
+        <a href="{{ url_for('complaints.complaints') }}" style="text-decoration: none;">
+          <div class="how-step card animate-on-scroll" id="interactionDemo">
+            <div class="big-icon"><i class="fa-solid fa-thumbs-up"></i></div>
+            <h4 data-key="community_title">Community Feedback</h4>
+            <p data-key="community_desc">Other citizens can like, dislike, or comment — this helps prioritize problems.
+            </p>
+          </div>
+        </a>
+        <a href="{{ url_for('status') }}" style="text-decoration: none;">
+          <div class="how-step card animate-on-scroll">
+            <div class="big-icon"><i class="fa-solid fa-list-check"></i></div>
+            <h4 data-key="track_title">Track Status</h4>
+            <p data-key="track_desc">Check the status of your complaint using the complaint ID — see live updates.</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- REPORT CATEGORIES -->
+  <section id="report">
+    <div class="container-l">
+      <h2 class="section-title" data-key="report_categories_title">Report Categories</h2>
+      <div class="row g-3">
+
+        <div class="col-6 col-md-3">
+          <a href="{{ url_for('garbage.garbage_page') }}" style="text-decoration:none; color:inherit;">
+            <div class="card text-center">
+              <div class="big-icon"><i class="fa-solid fa-trash-alt"></i></div>
+              <h5 data-key="garbage_title">Garbage</h5>
+              <p class="text-muted" data-key="garbage_desc">Overflowing bins and illegal dumping.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <a href="{{ url_for('drainage.drainage_page') }}" style="text-decoration:none; color:inherit;">
+            <div class="card text-center">
+              <div class="big-icon"><i class="fa-solid fa-lightbulb"></i></div>
+              <h5 data-key="drainage_title">Drainage</h5>
+              <p class="text-muted" data-key="drainage_desc">Blocked or overflowing drains.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <a href="{{ url_for('roads.roads_page') }}" style="text-decoration:none; color:inherit;">
+            <div class="card text-center">
+              <div class="big-icon"><i class="fa-solid fa-road"></i></div>
+              <h5 data-key="roads_title">Roads</h5>
+              <p class="text-muted" data-key="roads_desc">Potholes and damaged surfaces.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <a href="{{ url_for('water.water_page') }}" style="text-decoration:none; color:inherit;">
+            <div class="card text-center">
+              <div class="big-icon"><i class="fa-solid fa-tint"></i></div>
+              <h5 data-key="water_title">Water</h5>
+              <p class="text-muted" data-key="water_desc">Leaks, supply or wastage issues.</p>
+            </div>
+          </a>
+        </div>
+
+        <div class="col-6 col-md-3">
+          <a href="{{ url_for('animal_rescue.animal_page') }}" style="text-decoration:none; color:inherit;">
+            <div class="card text-center">
+              <div class="big-icon"><i class="fa-solid fa-dog"></i></div>
+              <h5 data-key="animal_title">Animal Rescue</h5>
+              <p class="text-muted" data-key="animal_desc">Stray or injured animals.</p>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW TO USE -->
+  <section id="howto">
+    <div class="container-l">
+      <h2 class="section-title" data-key="how_to_use_title">How to Use This App — Step by Step</h2>
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div>
+            <h4 data-key="step1_title">Open the Report Form</h4>
+            <p data-key="step1_desc">Click Report an Issue from the homepage to open the report modal or page.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div>
+            <h4 data-key="step2_title">Capture Clear Evidence</h4>
+            <p data-key="step2_desc">Take a clear photo or short video of the issue.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div>
+            <h4 data-key="step3_title">Choose Location</h4>
+            <p data-key="step3_desc">Use the map picker or enter the address to pinpoint location.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div>
+            <h4 data-key="step4_title">Select Category & Add Details</h4>
+            <p data-key="step4_desc">Pick category (Roads, Garbage, etc.) and describe the issue.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">5</div>
+          <div>
+            <h4 data-key="step5_title">Submit & Get an ID</h4>
+            <p data-key="step5_desc">Submit the report — you’ll receive a complaint ID.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">6</div>
+          <div>
+            <h4 data-key="step6_title">Engage the Community</h4>
+            <p data-key="step6_desc">Share the complaint link for others to like/comment.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">7</div>
+          <div>
+            <h4 data-key="step7_title">Track & Verify Resolution</h4>
+            <p data-key="step7_desc">Use the complaint ID to check status and verify when done.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE MAP -->
+  <section id="explore" class="map-preview">
+    <div class="container-l">
+      <h2 class="section-title" data-key="explore_map_title">Explore Issues on Map</h2>
+      <div id="map" style="width:100%; height:500px; border-radius:12px;"></div>
+    </div>
+  </section>
+</main>
+
+<!-- LEAFLET CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const LOGOUT_URL = "{{ url_for('login1.logout') }}";
+  const LOGIN_URL = "{{ url_for('login1.login') }}";
+</script>
+
+<script>
+
+  // Initialize map with Anand bounds
+  var anandBounds = L.latLngBounds([22.50, 72.90], [22.60, 73.00]);
+  var map = L.map('map').setView([22.5525, 72.9511], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    minZoom: 12,
+    maxZoom: 18
+  }).addTo(map);
+
+  map.fitBounds(anandBounds);
+
+
+  var categoryColors = {
+    'water': '#5DADE2',
+    'garbage': '#FF7F50',
+    'roads': '#F1C40F',
+    'animal rescue': '#1ABC9C',
+    'drainage': '#9B59B6',
+
+  };
+
+  var markers = [];
+
+  function loadIssues() {
+    fetch("/api/issues")
+      .then(res => res.json())
+      .then(issues => {
+        // remove old markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        issues.forEach(issue => {
+          if (issue.latitude && issue.longitude) {
+            var lat = parseFloat(issue.latitude);
+            var lng = parseFloat(issue.longitude);
+
+            if (!isNaN(lat) && !isNaN(lng)) {
+              var marker = L.circleMarker([lat, lng], {
+                radius: 8,
+                fillColor: categoryColors[(issue.category || '').toLowerCase()] || 'gray',
+                color: '#fff',
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+              }).addTo(map);
+
+              marker.bindPopup(
+                `<b>${translations["popup_category"]}: ${translations["category_" + (issue.category || "unknown").toLowerCase()] || issue.category}</b><br>
+   ${translations["popup_area"]}: ${issue.area || 'N/A'}<br>
+   ${translations["popup_desc"]}: ${issue.description || 'N/A'}<br>
+   ${translations["popup_status"]}: ${issue.status || 'N/A'}`
+              );
+
+
+              markers.push(marker);
+            }
+          }
+        });
+
+        // auto-fit bounds if markers exist
+        if (markers.length > 0) {
+          var group = new L.featureGroup(markers);
+          map.fitBounds(group.getBounds().pad(0.2));
+        }
+      })
+      .catch(err => console.error("Error loading issues:", err));
+  }
+
+  // initial load + refresh every 10s
+  loadIssues();
+  // setInterval(loadIssues, 10000);
+
+  // -------- Legend --------
+  var legend = L.control({ position: 'topright' });
+  legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'info legend');
+    div.style.background = 'white';
+    div.style.padding = '10px';
+    div.style.borderRadius = '8px';
+    div.style.boxShadow = '0 0 6px rgba(0,0,0,0.3)';
+    div.innerHTML = '<h4>Categories</h4>';
+    for (var key in categoryColors) {
+      div.innerHTML +=
+        `<i style="background:${categoryColors[key]}; width:18px; height:18px; display:inline-block; margin-right:6px; border-radius:4px;"></i> ${key}<br>`;
+    }
+    return div;
+  };
+  legend.addTo(map);
+</script>
+
+{% endblock %}
